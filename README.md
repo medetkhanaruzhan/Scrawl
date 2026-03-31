@@ -5,7 +5,7 @@ A perfume recommendation platform that matches fragrances to your personality an
 
 ## Overview
 
-Scentra is a full-stack web app built with Angular and Django REST Framework. The idea is simple — instead of just browsing perfumes by scent notes, you describe yourself: what music you listen to, what kind of climate you live in, what movies you're into, and what you're sensitive to. Scentra uses that to suggest fragrances that actually fit you.
+Scentra is a full-stack web app built with Angular and Django REST Framework. The idea is simple - instead of just browsing perfumes by scent notes, you describe yourself: what music you listen to, what kind of climate you live in, what movies you're into, and what you're sensitive to. Scentra uses that to suggest fragrances that actually fit you.
 
 It was built as a university project, but the concept is real and the stack is production-style.
 
@@ -13,7 +13,7 @@ It was built as a university project, but the concept is real and the stack is p
 
 ## Idea / Concept
 
-Most perfume recommendation tools only ask "do you like floral or woody?" — which isn't enough. Scentra builds a preference profile for each user across multiple dimensions:
+Most perfume recommendation tools only ask "do you like floral or woody?" - which isn't enough. Scentra builds a preference profile for each user across multiple dimensions:
 
 - **Scent preferences** — the obvious one (vanilla, citrus, woody, floral, etc.)
 - **Music taste** — dark and moody listeners tend to like different scents than pop fans
