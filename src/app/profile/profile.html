@@ -1,0 +1,126 @@
+<div class="page">
+  <div class="profile-layout">
+    <div class="card">
+      <div class="left">
+        <div class="avatar">{{ getInitial() }}</div>
+
+        <div class="info-block">
+          <h1>@{{ user.username }}</h1>
+
+          <div class="tags">
+            <span>{{ user.studentId }}</span>
+            <span>{{ user.email }}</span>
+          </div>
+
+          <p class="bio-text">{{ user.bio }}</p>
+
+          <div class="bio-editor">
+            <textarea
+              [(ngModel)]="editBio"
+              placeholder="Write something about yourself..."
+            ></textarea>
+            <button class="save-btn" (click)="saveBio()">Save Info</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats">
+      <div class="box">
+        <h2>{{ scrawls }}</h2>
+        <p>SCRAWLS</p>
+      </div>
+
+      <div class="box">
+        <h2>{{ likes }}</h2>
+        <p>LIKES RECEIVED</p>
+      </div>
+
+      <div class="box">
+        <h2>{{ avg }}</h2>
+        <p>AVG. LIKES</p>
+      </div>
+
+      <div class="box">
+        <h2>{{ reposts }}</h2>
+        <p>REPOSTS</p>
+      </div>
+
+      <div class="box">
+        <h2>{{ saved }}</h2>
+        <p>SAVED</p>
+      </div>
+    </div>
+
+    
+    <h3>✦ Mood History</h3>
+
+    <div class="moods">
+      <div class="mood happy">
+        <div class="emoji">😊</div>
+        <h2>{{ happy }}</h2>
+        <p>HAPPY</p>
+      </div>
+
+      <div class="mood sad">
+        <div class="emoji">😢</div>
+        <h2>{{ sad }}</h2>
+        <p>SAD</p>
+      </div>
+
+      <div class="mood angry">
+        <div class="emoji">😡</div>
+        <h2>{{ angry }}</h2>
+        <p>ANGRY</p>
+      </div>
+
+      <div class="mood chill">
+        <div class="emoji">🤩</div>
+        <h2>{{ chill }}</h2>
+        <p>CHILL</p>
+      </div>
+    </div>
+
+<h3>✦ My Scrawls</h3>
+
+<div class="scrawls">
+  @for (post of posts; track post) {
+
+    <div class="scrawl-card">  
+
+      <div class="scrawl-text">
+        {{ post.content }}   
+      </div>
+
+      <div class="scrawl-footer">
+        <div class="badges">
+
+          <span class="badge mood">
+            🌿 {{ post.mood }}
+          </span>
+
+          <span class="badge like">
+            ❤️ {{ post.likes }}
+          </span>
+
+          <span class="badge repost">
+            🔁 {{ post.reposts }}
+          </span>
+
+          <span class="badge save">
+            🔖 {{ post.saved }}
+          </span>
+
+          @if (post.anon) {
+            <span class="badge anon">
+              🎭 anon
+            </span>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>
+  </div>
+</div>

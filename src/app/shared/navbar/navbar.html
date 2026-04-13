@@ -1,0 +1,20 @@
+<div class="navbar">
+
+  <div class="logo">
+    ✨ Scrawl <span>KBTU</span>
+  </div>
+
+  <div class="links">
+    <a routerLink="/feed">Feed</a>
+    <a routerLink="/profile">Profile</a>
+  </div>
+
+  <div class="user">
+    <div class="avatar">
+      {{ getInitial() }}
+    </div>
+
+    <button (click)="logout()">Logout</button>
+  </div>
+
+</div>
