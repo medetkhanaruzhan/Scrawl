@@ -1,0 +1,30 @@
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      <span class="logo-text">Scrawl</span>
+    </div>
+    <p class="sidebar-tagline">KBTU Social Feed</p>
+  </div>
+
+  <div class="section-label">Communities</div>
+
+  <nav class="faculty-list">
+    @for (faculty of faculties; track faculty.id) {
+      <button
+        class="faculty-card"
+        [class.active]="faculty.id === activeFacultyId"
+        [style.--card-accent]="getAccentColor(faculty.id)"
+        (click)="select(faculty.id)"
+      >
+        <div class="faculty-badge" [style.background]="getAccentColor(faculty.id) + '22'" [style.border-color]="getAccentColor(faculty.id) + '44'">
+          <span class="badge-text" [style.color]="getAccentColor(faculty.id)">{{ faculty.shortName }}</span>
+        </div>
+        <div class="faculty-info">
+          <span class="faculty-name">{{ faculty.name }}</span>
+          <span class="faculty-desc">{{ faculty.description }}</span>
+        </div>
+        <span class="faculty-count">{{ faculty.postCount }}</span>
+      </button>
+    }
+  </nav>
+</aside>

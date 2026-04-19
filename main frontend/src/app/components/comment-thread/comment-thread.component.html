@@ -1,0 +1,21 @@
+<div class="comment-thread">
+  @for (c of tree; track c.id) {
+    <app-comment-node
+      [comment]="c"
+      [depth]="0"
+      [currentUserId]="currentUserId"
+      [activeReplyId]="activeReplyId()"
+      [replyDraft]="replyDraft()"
+      (replyDraftChange)="replyDraft.set($event)"
+      (replyClick)="onReplyClick($event)"
+      (sendReplyClick)="onSendReply($event)"
+      [editingCommentId]="editingCommentId()"
+      [editDraft]="editDraft()"
+      (editDraftChange)="editDraft.set($event)"
+      (beginEdit)="onBeginEdit($event)"
+      (saveEditClick)="onSaveEdit($event)"
+      (cancelEditClick)="onCancelEdit()"
+      (deleteClick)="onDeleteComment($event)"
+    />
+  }
+</div>

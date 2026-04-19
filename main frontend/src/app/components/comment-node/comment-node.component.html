@@ -1,0 +1,98 @@
+<div class="comment-node" [class.is-nested]="depth > 0">
+  <div class="comment-card">
+    <div class="comment-header">
+      <div class="comment-author">
+        @if (comment.author.avatar) {
+          <img [src]="comment.author.avatar" alt="" class="avatar-img" />
+        } @else {
+          <div class="avatar-fallback">{{ avatarInitials(comment) }}</div>
+        }
+        <div class="meta">
+          <div class="username">{{ displayAuthor(comment) }}</div>
+          <div class="sub">
+            <span class="handle">&#64;{{ comment.author.username }}</span>
+            <span class="dot">·</span>
+            <span class="time">{{ relativeTime(comment.created_at) }}</span>
+          </div>
+        </div>
+      </div>
+
+      @if (isOwner(comment)) {
+        <div class="comment-menu">
+          @if (editingCommentId !== comment.id) {
+            <button type="button" class="menu-btn" (click)="onEditStart()">Edit</button>
+            <button type="button" class="menu-btn danger" (click)="onDelete()">Delete</button>
+          }
+        </div>
+      }
+    </div>
+
+    @if (editingCommentId === comment.id) {
+      <div class="comment-edit">
+        <textarea
+          class="edit-area"
+          rows="3"
+          [ngModel]="editDraft"
+          (ngModelChange)="editDraftChange.emit($event)"
+        ></textarea>
+        <div class="edit-actions">
+          <button type="button" class="btn-ghost" (click)="cancelEditClick.emit()">Cancel</button>
+          <button type="button" class="btn-primary" (click)="saveEditClick.emit(comment.id)">Save</button>
+        </div>
+      </div>
+    } @else {
+      <div class="comment-content">{{ comment.content }}</div>
+    }
+
+    @if (editingCommentId !== comment.id) {
+      <div class="comment-actions">
+        <button type="button" class="action-link" (click)="onReplyButton()">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
+          Reply
+        </button>
+      </div>
+    }
+
+    @if (activeReplyId === comment.id) {
+      <div class="inline-reply">
+        <input
+          type="text"
+          class="inline-input"
+          placeholder="Write a reply…"
+          [ngModel]="replyDraft"
+          (ngModelChange)="replyDraftChange.emit($event)"
+          (keyup.enter)="onSendReply()"
+        />
+        <button type="button" class="inline-send" [disabled]="!replyDraft.trim()" (click)="onSendReply()">
+          Reply
+        </button>
+      </div>
+    }
+  </div>
+
+  @if (comment.replies?.length) {
+    <div class="replies-branch">
+      @for (child of comment.replies; track child.id) {
+        <app-comment-node
+          [comment]="child"
+          [depth]="depth + 1"
+          [currentUserId]="currentUserId"
+          [activeReplyId]="activeReplyId"
+          [replyDraft]="replyDraft"
+          (replyDraftChange)="replyDraftChange.emit($event)"
+          (replyClick)="replyClick.emit($event)"
+          (sendReplyClick)="sendReplyClick.emit($event)"
+          [editingCommentId]="editingCommentId"
+          [editDraft]="editDraft"
+          (editDraftChange)="editDraftChange.emit($event)"
+          (beginEdit)="beginEdit.emit($event)"
+          (saveEditClick)="saveEditClick.emit($event)"
+          (cancelEditClick)="cancelEditClick.emit()"
+          (deleteClick)="deleteClick.emit($event)"
+        />
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,203 @@
+<div class="scrawl-card" [class.is-anonymous]="scrawl.isAnonymous" [attr.data-mood]="scrawl.mood">
+  <!-- Mood gradient strip (only if mood is not none) -->
+  <div class="mood-strip" *ngIf="scrawl.mood !== 'none'"></div>
+
+  <div class="card-content">
+    <div class="card-header">
+      <div class="author-info">
+        <!-- Avatar: clickable for named authors, plain for anonymous -->
+        @if (!scrawl.isAnonymous) {
+          <a [routerLink]="authorProfileLink" class="avatar-link" title="View profile">
+            @if (scrawl.avatar) {
+              <img [src]="scrawl.avatar" alt="Avatar" class="avatar-img">
+            } @else {
+              <div class="avatar">
+                {{ getAvatarInitials(scrawl.authorName) }}
+              </div>
+            }
+          </a>
+        } @else {
+          <div class="avatar anon-avatar">?</div>
+        }
+        <div class="author-meta">
+          @if (!scrawl.isAnonymous) {
+            <a [routerLink]="authorProfileLink" class="author-name-link">
+              {{ scrawl.authorName }}
+            </a>
+          } @else {
+            <span class="author-name">Anonymous</span>
+          }
+          <span class="time">{{ timeAgo }}</span>
+        </div>
+      </div>
+      <div class="badges">
+        <span class="faculty-badge">{{ facultyLabel }}</span>
+        <span class="mood-badge" *ngIf="scrawl.mood !== 'none'" [attr.data-mood]="scrawl.mood">
+          {{ moodEmoji }} {{ moodLabel }}
+        </span>
+
+        <!-- Options Menu for Author -->
+        <div class="options-wrapper" *ngIf="isOwnScrawl">
+          <button class="options-btn" (click)="toggleMenu()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="1"></circle>
+              <circle cx="19" cy="12" r="1"></circle>
+              <circle cx="5" cy="12" r="1"></circle>
+            </svg>
+          </button>
+          <div class="options-dropdown" *ngIf="menuOpen()">
+            <button class="menu-item" (click)="startEdit()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              Edit
+            </button>
+            <button class="menu-item delete" (click)="deleteScrawl()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- View Mode -->
+    <ng-container *ngIf="!isEditing()">
+      <div class="scrawl-text">{{ scrawl.content }}</div>
+
+      <!-- Scrawl Image -->
+      <div class="card-image-wrapper" *ngIf="scrawl.image || scrawl.imageUrl">
+        <img [src]="scrawl.image || scrawl.imageUrl" alt="Scrawl image" class="scrawl-image" loading="lazy">
+      </div>
+
+      <!-- Tags -->
+      <div class="card-tags" *ngIf="scrawl.tags && scrawl.tags.length > 0">
+        <span class="tag-badge" *ngFor="let tag of scrawl.tags" (click)="onTagClick(tag, $event)">
+          #{{ tag }}
+        </span>
+      </div>
+    </ng-container>
+
+    <!-- Edit Mode -->
+    <div class="edit-mode-container" *ngIf="isEditing()">
+      <textarea class="edit-textarea" [(ngModel)]="editContent" rows="4"></textarea>
+
+      <div class="edit-mode-tags">
+        <div class="tags-list">
+          <span class="tag-badge" *ngFor="let tag of editTags()">
+            #{{ tag }} <button (click)="removeEditTag(tag)">×</button>
+          </span>
+          <input type="text" class="tag-field" placeholder="Add tag..."
+            *ngIf="editTags().length < 5"
+            [ngModel]="editTagInput()" (ngModelChange)="editTagInput.set($event)"
+            (keydown.enter)="addEditTag($event)" (keydown.space)="addEditTag($event)">
+        </div>
+      </div>
+
+      <div class="edit-mode-mood">
+        <span class="label">Mood:</span>
+        <div class="mood-pills">
+          <button class="mood-pill"
+            *ngFor="let m of moods"
+            [class.active]="editMood() === m.value"
+            [attr.data-mood]="m.value"
+            (click)="editMood.set(m.value)">
+            <span class="mood-emoji">{{ m.emoji }}</span>
+          </button>
+          <button class="mood-pill" [class.active]="editMood() === 'none'" (click)="editMood.set('none')">
+            <span class="mood-emoji">😐</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="edit-actions">
+        <button class="btn-cancel" (click)="cancelEdit()">Cancel</button>
+        <button class="btn-save" [disabled]="!editContent().trim()" (click)="saveScrawlEdit()">Save</button>
+      </div>
+    </div>
+
+    <!-- Action Row (View Mode only) -->
+    <div class="action-row" *ngIf="!isEditing()">
+      <div class="action-group">
+        <!-- Reply -->
+        <button class="action-btn reply-btn" [class.active]="scrawl.showReplyInput" (click)="onToggleReply()" title="Reply">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <span class="count" *ngIf="(scrawl.replyCount ?? 0) > 0">{{ scrawl.replyCount }}</span>
+          <span class="label">Reply</span>
+        </button>
+
+        <!-- ReScrawl -->
+        <button class="action-btn rescrawl-btn" [class.active]="scrawl.isRescrawled" (click)="onAction('rescrawl')" title="ReScrawl">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="17 1 21 5 17 9"/>
+            <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+            <polyline points="7 23 3 19 7 15"/>
+            <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+          </svg>
+          <span class="count" *ngIf="(scrawl.rescrawlCount ?? 0) > 0">{{ scrawl.rescrawlCount }}</span>
+          <span class="label">ReScrawl</span>
+        </button>
+
+        <!-- Like -->
+        <button class="action-btn like-btn" [class.active]="scrawl.isLiked" (click)="onAction('like')" title="Like">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+               [attr.fill]="scrawl.isLiked ? '#f43f5e' : 'none'"
+               [attr.stroke]="scrawl.isLiked ? '#f43f5e' : 'currentColor'">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 1 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+          <span class="count" *ngIf="(scrawl.likeCount ?? 0) > 0">{{ scrawl.likeCount }}</span>
+          <span class="label">Like</span>
+        </button>
+      </div>
+
+      <div class="action-group right">
+        <!-- Save -->
+        <button class="action-btn save-btn" [class.active]="scrawl.isSaved" (click)="onAction('save')" title="Save">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+               [attr.fill]="scrawl.isSaved ? '#fbbf24' : 'none'"
+               [attr.stroke]="scrawl.isSaved ? '#fbbf24' : 'currentColor'">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+          </svg>
+          <span class="count" *ngIf="(scrawl.saveCount || 0) > 0">{{ scrawl.saveCount }}</span>
+          <span class="label">{{ scrawl.isSaved ? 'Saved' : 'Save' }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Reply Input Area -->
+  <div class="reply-input-area" *ngIf="scrawl.showReplyInput && !isEditing()">
+    <div class="connector-line input-connector"></div>
+    <div class="reply-box">
+      <div class="avatar small">Yo</div>
+      <div class="reply-input-wrapper">
+        <input type="text" placeholder="Write a reply..." [ngModel]="replyContent()" (ngModelChange)="replyContent.set($event)" (keyup.enter)="submitReply()" class="reply-input">
+        <button class="reply-submit-btn" [disabled]="!replyContent().trim()" (click)="submitReply()">Reply</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Threaded Replies -->
+  <div class="replies-section" *ngIf="comments.length > 0 && !isEditing()">
+    <button class="toggle-replies-btn" *ngIf="!scrawl.showReplies" (click)="onToggleReplies()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="toggle-icon"><polyline points="6 9 12 15 18 9"/></svg>
+      Show {{ comments.length }} {{ comments.length === 1 ? 'reply' : 'replies' }}
+    </button>
+
+    <div class="replies-list" *ngIf="scrawl.showReplies">
+      <app-comment-thread
+        [comments]="comments"
+        [postId]="scrawl.id"
+        [currentUserId]="authService.currentUser()?.id ?? null"
+        (replySubmit)="onCommentThreadReply($event)"
+        (editSubmit)="onCommentThreadEdit($event)"
+        (deleteComment)="onCommentThreadDelete($event)"
+      />
+
+      <button class="hide-replies-btn" (click)="onToggleReplies()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="toggle-icon"><polyline points="18 15 12 9 6 15"/></svg>
+        Hide replies
+      </button>
+    </div>
+  </div>
+</div>
