@@ -336,12 +336,22 @@ export class ProfileComponent implements OnInit, OnDestroy {
         ? p.author.avatar
         : `http://127.0.0.1:8000${p.author.avatar}`;
     }
+
+    // Build full image URL if relative (same as feed page)
+    let imageUrl: string | undefined;
+    if (p.image) {
+      imageUrl = p.image.startsWith('http')
+        ? p.image
+        : `http://127.0.0.1:8000${p.image}`;
+    }
+
     return {
       id: String(p.id),
       authorName: displayName,
       authorUsername: p.is_anonymous ? 'anonymous' : p.author.username,
       avatar,
       content: p.content,
+      image: imageUrl,
       mood: (p.mood as any) || 'none',
       faculty: (p.faculty ?? '').toString().trim().toLowerCase() || 'fit',
       createdAt: new Date(p.created_at),
