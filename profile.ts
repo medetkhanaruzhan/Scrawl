@@ -26,15 +26,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   private routeSub?: Subscription;
 
-  // ── Resolved username (from route param, or falls back to current user) ───
   readonly profileUsername = signal<string>('');
 
-  /** True when viewing your own profile */
   readonly isOwnProfile = computed(() =>
     this.authService.isCurrentUser(this.profileUsername())
   );
 
-  // ── Displayed user data (merged from services) ────────────────────────────
   readonly displayUser = computed(() => {
     const username = this.profileUsername();
     if (!username) return null;
@@ -66,7 +63,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
     }
   });
 
-  // ── Follow system (only relevant for other profiles) ──────────────────────
   readonly isFollowed = computed(() =>
     this.userService.isFollowing(this.profileUsername())
   );
@@ -81,7 +77,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
     }
   }
 
-  // ── Bio editing (own profile only) ────────────────────────────────────────
   editBio = signal('');
   isEditingBio = signal(false);
 
@@ -107,7 +102,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.isEditingBio.set(false);
   }
 
-  // ── Avatar editing (own profile only) ──────────────────────────────────────
   onAvatarFileSelected(event: Event): void {
     if (!this.isOwnProfile()) return;
     const input = event.target as HTMLInputElement;
@@ -122,7 +116,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
     });
   }
 
-  // ── Tabs ──────────────────────────────────────────────────────────────────
   activeTab = signal<ProfileTab>('scrawls');
   setTab(tab: ProfileTab): void {
     this.activeTab.set(tab);
@@ -131,23 +124,19 @@ export class ProfileComponent implements OnInit, OnDestroy {
     if (tab === 'rescrawls') this.loadRescrawledPosts();
   }
 
-  // ── Mood history ─────────────────────────────────────────────────────────
   happy = computed(() => this.calculateMoodCount('happy'));
   sad   = computed(() => this.calculateMoodCount('sad'));
   angry = computed(() => this.calculateMoodCount('angry'));
   chill = computed(() => this.calculateMoodCount('chill'));
 
-  // ── Own posts (local, only used for own profile) ──────────────────────────
   private readonly ownPostsData: Scrawl[] = [];
 
   localOwnPosts = signal<Scrawl[]>([]);
 
-  // Other-user sample posts (shown when viewing other profiles)
   readonly otherUserPostsData: Record<string, Scrawl[]> = {};
 
   localOtherPosts = signal<Scrawl[]>([]);
 
-  // ── Feed posts (rescrawled & saved — only shown on OWN profile) ───────────
   readonly savedPostsData = signal<Scrawl[]>([]);
   readonly rescrawledPostsData = signal<Scrawl[]>([]);
   readonly rescrawledPosts = computed(() => this.rescrawledPostsData());
@@ -156,20 +145,17 @@ export class ProfileComponent implements OnInit, OnDestroy {
   readonly repliesOpenByPost = signal<Record<string, boolean>>({});
   readonly repliesByPost = signal<Record<string, Scrawl['replies']>>({});
 
-  // ── Stats ─────────────────────────────────────────────────────────────────
   readonly scrawlsCount   = computed(() => this.localOwnPosts().length);
   readonly totalLikes     = computed(() => this.localOwnPosts().reduce((acc, p) => acc + p.likeCount, 0));
   readonly rescrawlsCount = computed(() => this.rescrawledPosts().length);
   readonly savedCount     = computed(() => this.savedPosts().length);
 
-  // ── Lifecycle ─────────────────────────────────────────────────────────────
   ngOnInit(): void {
     this.routeSub = this.route.params.subscribe(params => {
       const paramUsername = params['id'] || params['username'] || '';
       const resolved = paramUsername || (this.authService.currentUser()?.username ?? '');
       this.profileUsername.set(resolved);
 
-      // Reset tab on navigation
       this.activeTab.set('scrawls');
       this.isEditingBio.set(false);
 
@@ -196,13 +182,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.routeSub?.unsubscribe();
   }
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
   getInitial(): string {
     const u = this.displayUser();
     return u ? u.username[0].toUpperCase() : '?';
   }
 
-  /** Map an API post to the Scrawl shape used by ScrawlCardComponent */
   private _mapApiPost(p: ApiPost): Scrawl {
     const displayName = p.is_anonymous
       ? 'Anonymous'
@@ -238,12 +222,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
 
-  /** Posts shown in the "My Scrawls" tab — depends on whose profile it is */
   readonly visiblePosts = computed<Scrawl[]>(() =>
     this.isOwnProfile() ? this.localOwnPosts() : this.localOtherPosts()
   );
 
-  // ── Action handlers: own posts ─────────────────────────────────────────────
   onOwnPostAction(event: ScrawlAction): void {
     this.handlePostAction(event);
   }
@@ -275,7 +257,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.handleReplyAction(ev);
   }
 
-  // ── Action handlers: feed posts (rescrawls / saved) ───────────────────────
   onFeedPostAction(event: ScrawlAction): void {
     this.handlePostAction(event);
   }
@@ -494,7 +475,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
     });
   }
 
-  // ── Reply actions (edit/delete) ────────────────────────────────────────────
   private handleReplyAction(ev: ReplyAction): void {
     const replyId = parseInt(ev.replyId, 10);
     if (isNaN(replyId)) return;
@@ -564,16 +544,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.rescrawledPostsData.update(updater);
   }
 
-  // ── Mood statistics ───────────────────────────────────────────────────────
   private calculateMoodCount(mood: string): number {
     const posts = this.localOwnPosts();
-    // Count posts with the given mood
     let count = posts.filter((p) => p.mood === mood).length;
-    
-    // Optionally include replies in mood calculation
     const allReplies = Object.values(this.repliesByPost()).flat();
     count += this.countRepliesWithMood(allReplies, mood);
-    
     return count;
   }
 

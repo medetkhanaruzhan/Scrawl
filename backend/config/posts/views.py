@@ -44,7 +44,6 @@ class PostViewSet(viewsets.ModelViewSet):
             ).distinct()
         if self.action == 'replies':
             return queryset.filter(parent_id=self.kwargs.get('pk'))
-        # For list action, filter by faculty if provided
         if self.action == 'list':
             faculty = self.request.query_params.get('faculty')
             if faculty and faculty != 'all':
@@ -156,7 +155,7 @@ class PostViewSet(viewsets.ModelViewSet):
             'mood': request.data.get('mood', ''),
             'is_anonymous': request.data.get('is_anonymous', False),
             'parent': parent_post.pk,
-            'faculty': parent_post.faculty,  # Inherit faculty from parent post
+            'faculty': parent_post.faculty,
         }
         serializer = self.get_serializer(data=payload)
         serializer.is_valid(raise_exception=True)
@@ -186,22 +185,15 @@ class UserStatsView(APIView):
 
 @api_view(['GET'])
 def community_counts(request):
-    """Get post counts for each faculty/community (top-level posts only)"""
     data = Post.objects.filter(parent__isnull=True).values('faculty').annotate(count=Count('id')).order_by('-count')
-    
-    # Get total count for "All Communities"
     total_posts = Post.objects.filter(parent__isnull=True).count()
-    
-    # Convert to dict with faculty as key for easier frontend consumption
     result = {item['faculty']: item['count'] for item in data}
-    result['ALL'] = total_posts  # Add total count for "All Communities"
-    
+    result['ALL'] = total_posts
     return Response(result)
 
 
 @api_view(['POST'])
 def create_comment(request):
-    """Create a new comment (legacy: POST /api/posts/comments/)"""
     if not request.user.is_authenticated:
         return Response({'detail': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -214,10 +206,6 @@ def create_comment(request):
 
 @api_view(['GET', 'POST'])
 def comments_collection(request):
-    """
-    GET  /api/comments/?post=<id>  — list top-level comments (nested via serializer)
-    POST /api/comments/            — create comment (auth required)
-    """
     if request.method == 'GET':
         post_id = request.query_params.get('post')
         if not post_id:
@@ -250,7 +238,6 @@ def comments_collection(request):
 
 @api_view(['GET', 'PATCH', 'DELETE'])
 def comment_detail(request, pk):
-    """GET/PATCH/DELETE /api/comments/<id>/"""
     comment = get_object_or_404(
         Comment.objects.select_related('author', 'author__profile'),
         pk=pk,
@@ -280,15 +267,10 @@ def comment_detail(request, pk):
 
 @api_view(['GET'])
 def get_post_comments(request, post_id):
-    """Get all comments for a specific post"""
     try:
         post = get_object_or_404(Post, id=post_id)
     except:
         return Response({'detail': 'Post not found'}, status=status.HTTP_404_NOT_FOUND)
-    
-    # Get top-level comments (no parent)
     comments = Comment.objects.filter(post=post, parent__isnull=True).order_by('created_at')
-    
-    # Serialize with nested replies
     serializer = CommentSerializer(comments, many=True, context={'request': request})
     return Response(serializer.data)

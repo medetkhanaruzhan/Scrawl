@@ -6,6 +6,12 @@ from .models import Post, Comment
 User = get_user_model()
 
 
+class SimpleTextSerializer(serializers.Serializer):
+    """Simple serializer for text validation (not a ModelSerializer)."""
+    text = serializers.CharField(max_length=280)
+    created_at = serializers.DateTimeField(read_only=True)
+
+
 class PostAuthorSerializer(serializers.ModelSerializer):
     avatar = serializers.SerializerMethodField()
 

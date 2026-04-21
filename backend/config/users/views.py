@@ -34,7 +34,6 @@ def login_view(request):
     serializer = LoginSerializer(data=request.data)
     if serializer.is_valid():
         return Response(serializer.validated_data, status=status.HTTP_200_OK)
-    # If the error is 'Invalid login credentials.', return 401
     errors = serializer.errors
     if 'non_field_errors' in errors and any('Invalid login' in str(e) for e in errors['non_field_errors']):
         return Response({
@@ -58,7 +57,6 @@ class UserMeView(APIView):
         user = request.user
         profile = user.profile
 
-        # Update User model fields
         user_fields = ['first_name', 'last_name']
         user_changed = False
         for field in user_fields:
@@ -68,7 +66,6 @@ class UserMeView(APIView):
         if user_changed:
             user.save()
 
-        # Update Profile model fields
         profile_fields = ['bio', 'phone', 'faculty']
         profile_changed = False
         for field in profile_fields:
@@ -76,7 +73,6 @@ class UserMeView(APIView):
                 setattr(profile, field, request.data[field])
                 profile_changed = True
 
-        # Handle avatar file upload
         if 'avatar' in request.FILES:
             profile.avatar = request.FILES['avatar']
             profile_changed = True
@@ -99,7 +95,6 @@ class LogoutView(APIView):
                 token.blacklist()
             return Response({"message": "Successfully logged out."}, status=status.HTTP_200_OK)
         except Exception as e:
-            # If blacklisting fails, we still return 200 because frontend handles logout locally anyway
             return Response({"message": "Successfully logged out."}, status=status.HTTP_200_OK)
 
 
@@ -132,13 +127,11 @@ class FollowToggleView(APIView):
 
 
 class FollowersView(APIView):
-    """Get list of users who follow this user"""
     permission_classes = [AllowAny]
 
     def get(self, request, user_id):
         try:
             target_user = get_object_or_404(User, id=user_id)
-            # Users where target_user is in their 'following' (they follow target_user)
             followers = User.objects.filter(
                 following__following=target_user
             ).select_related('profile').distinct()
@@ -152,13 +145,11 @@ class FollowersView(APIView):
 
 
 class FollowingView(APIView):
-    """Get list of users this user follows"""
     permission_classes = [AllowAny]
 
     def get(self, request, user_id):
         try:
             target_user = get_object_or_404(User, id=user_id)
-            # Users where target_user is in their 'followers' (target_user follows them)
             following = User.objects.filter(
                 followers__follower=target_user
             ).select_related('profile').distinct()
@@ -215,7 +206,6 @@ class FollowCountsView(APIView):
 
 
 class UserByUsernameView(APIView):
-    """Get user profile by username"""
     permission_classes = [AllowAny]
 
     def get(self, request, username):

@@ -13,7 +13,6 @@ export interface AuthUser {
   phone: string;
   bio: string;
   avatar?: string;
-  // Aliases for component compatibility
   displayName: string;
   studentId: string;
 }

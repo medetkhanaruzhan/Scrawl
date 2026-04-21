@@ -14,6 +14,14 @@ FACULTY_CHOICES = [
 ]
 
 
+class PostManager(models.Manager):
+    """Custom manager for Post model."""
+
+    def published(self):
+        """Return all non-anonymous top-level posts."""
+        return self.filter(is_anonymous=False, parent__isnull=True)
+
+
 class Post(models.Model):
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -57,6 +65,8 @@ class Post(models.Model):
     likes_count = models.PositiveIntegerField(default=0)
     saves_count = models.PositiveIntegerField(default=0)
     rescralws_count = models.PositiveIntegerField(default=0)
+
+    objects = PostManager()
 
     class Meta:
         ordering = ['-created_at']
