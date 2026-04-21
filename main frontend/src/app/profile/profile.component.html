@@ -1,6 +1,5 @@
 <div class="page">
 
-  <!-- ── TOP BAR ─────────────────────────────────────────────────────────── -->
   <header class="profile-top-bar">
     <div class="header-left">
       <div class="logo">
@@ -41,13 +40,10 @@
     </div>
   } @else if (displayUser()) {
 
-  <!-- ── PROFILE BODY ──────────────────────────────────────────────────────── -->
+  
   <div class="profile-layout">
-
-    <!-- ── 1. HEADER CARD ────────────────────────────────────────────────── -->
     <section class="profile-header-card">
 
-      <!-- Avatar row: avatar left | Follow OR "you" badge right -->
       <div class="avatar-row">
         <label class="avatar-label" [class.editable]="isOwnProfile()">
           @if (displayUser()!.avatar.startsWith('data:') || displayUser()!.avatar.startsWith('http')) {
@@ -66,11 +62,9 @@
           }
         </label>
 
-        <!-- OWN profile: show a subtle "You" chip instead of Follow -->
         @if (isOwnProfile()) {
           <span class="own-badge">Your Profile</span>
         } @else {
-          <!-- OTHER profile: Follow / Following toggle -->
           <button
             class="follow-btn"
             [class.following]="isFollowed()"
@@ -112,7 +106,6 @@
       </div>
 
 
-      <!-- Bio section: editable only on OWN profile -->
       @if (isOwnProfile()) {
         @if (!isEditingBio()) {
           <div class="bio-display">
@@ -141,7 +134,7 @@
           </div>
         }
       } @else {
-        <!-- Read-only bio for other users -->
+    
         <div class="bio-display readonly">
           <p class="bio-text">{{ displayUser()!.bio }}</p>
         </div>
@@ -183,7 +176,6 @@
       </div>
     </section>
 
-    <!-- ── 2. TABS ─────────────────────────────────────────────────────────── -->
     @if (isOwnProfile()) {
       <nav class="profile-tabs">
         <button
@@ -240,10 +232,8 @@
       </nav>
     }
 
-    <!-- ── 3. TAB CONTENT ────────────────────────────────────────────────── -->
     <div class="tab-content">
 
-      <!-- MY SCRAWLS / OTHER'S SCRAWLS -->
       @if (!isOwnProfile() || activeTab() === 'scrawls') {
         <div class="posts-list" id="section-scrawls">
           @if (visiblePosts().length === 0) {
@@ -268,7 +258,6 @@
         </div>
       }
 
-      <!-- RESCRAWLS (own profile only) -->
       @if (activeTab() === 'rescrawls' && isOwnProfile()) {
         <div class="posts-list" id="section-rescrawls">
           @if (rescrawledPosts().length === 0) {
@@ -302,7 +291,6 @@
         </div>
       }
 
-      <!-- SAVED (own profile only) -->
       @if (activeTab() === 'saved' && isOwnProfile()) {
         <div class="posts-list" id="section-saved">
           @if (savedPosts().length === 0) {

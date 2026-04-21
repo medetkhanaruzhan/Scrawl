@@ -22,7 +22,6 @@ export class AuthService {
   private http = inject(HttpClient);
   private apiUrl = 'http://127.0.0.1:8000/api/auth';
 
-  /** The currently signed-in user */
   readonly currentUser = signal<AuthUser | null>(null);
 
   isLoggedIn(): boolean {
@@ -58,7 +57,7 @@ export class AuthService {
     );
   }
 
-  /** PATCH /api/auth/me/ with arbitrary fields (JSON or FormData) */
+  /** PATCH /api/auth/me/ with arbitrary fields  */
   updateProfile(data: any): Observable<any> {
     return this.http.patch(`${this.apiUrl}/me/`, data).pipe(
       tap((user: any) => {
@@ -73,13 +72,12 @@ export class AuthService {
     this.currentUser.set(null);
   }
 
-  /** Optimistic update for bio — caller should also persist via updateProfile() */
+
   updateBio(bio: string): void {
     const user = this.currentUser();
     if (user) this.currentUser.set({ ...user, bio });
   }
 
-  /** Optimistic update for avatar (set from returned URL after PATCH) */
   updateAvatar(avatar: string): void {
     const user = this.currentUser();
     if (user) this.currentUser.set({ ...user, avatar });
@@ -92,7 +90,6 @@ export class AuthService {
   private _mapAndSetUser(apiUser: any) {
     if (!apiUser) return;
 
-    // Avatar: build full URL if it's a relative path
     let avatar: string | undefined;
     if (apiUser.avatar) {
       avatar = apiUser.avatar.startsWith('http')

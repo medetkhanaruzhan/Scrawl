@@ -10,7 +10,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   let modifiedReq = req;
 
-  // Don't add Authorization header for login and register endpoints
+  
   const isPublicEndpoint = req.url.includes('/login') || req.url.includes('/register');
   if (token && !isPublicEndpoint) {
     modifiedReq = req.clone({

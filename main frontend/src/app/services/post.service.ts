@@ -2,7 +2,6 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 
-/** Shape returned by the backend for each post */
 export interface ApiPost {
   id: number;
   content: string;
@@ -31,7 +30,7 @@ export interface ApiPost {
   parent?: number | null;
 }
 
-/** Community counts by faculty */
+
 export interface CommunityCounts {
   [faculty: string]: number;
 }
@@ -84,17 +83,17 @@ export class PostService {
     );
   }
 
-  /** Backward-compatible alias used by existing code */
+
   loadPosts(): Observable<ApiPost[]> {
     return this.getPosts();
   }
 
-  /** Load only one user's posts (for profile page) */
+
   loadUserPosts(userId: number): Observable<ApiPost[]> {
     return this.http.get<ApiPost[]>(`${this.apiUrl}/user/${userId}/`);
   }
 
-  /** Load current user's posts */
+
   loadMyPosts(): Observable<ApiPost[]> {
     return this.http.get<ApiPost[]>(`${this.apiUrl}/me/`);
   }
@@ -114,7 +113,7 @@ export class PostService {
     return this.http.get<ApiPost[]>(`${this.apiUrl}/user/${userId}/rescrawled/`);
   }
 
-  /** Create a post with optional image using FormData (multipart) */
+  
   createPost(form: { content: string; mood: string; is_anonymous: boolean; faculty?: string; image?: File; tags?: string[] }): Observable<ApiPost> {
     const formData = new FormData();
 

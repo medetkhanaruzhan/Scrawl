@@ -7,7 +7,6 @@
     </div>
 
     <div class="search-sort-bar">
-      <!-- Future Search Box placeholder -->
     </div>
 
     <div class="profile-actions">
@@ -52,7 +51,6 @@
       <app-new-scrawl [currentFaculty]="activeFacultyId()" (published)="onScrawlPublished($event)"></app-new-scrawl>
 
       <div class="scrawl-list">
-        <!-- Skeleton Loader state -->
         <ng-container *ngIf="isLoading()">
           <div class="skeleton-card" *ngFor="let item of [1,2,3]">
             <div class="skeleton-header">
@@ -78,13 +76,11 @@
         <!-- Fully Loaded Feed -->
         <ng-container *ngIf="!isLoading()">
 
-          <!-- Empty State (No posts at all in faculty) -->
           <div class="empty-state" *ngIf="isEmpty">
             <h3>No scrawls yet.</h3>
             <p>Be the first to post something here.</p>
           </div>
 
-          <!-- Empty State (No posts matching tag filter) -->
           <div class="empty-state" *ngIf="isFilterEmpty">
             <h3>Nothing found for this filter</h3>
             <p>Try clearing the tag or selecting another one.</p>
